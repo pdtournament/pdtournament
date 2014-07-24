@@ -1,0 +1,16 @@
+name:                pdtournament
+version:             0.1.0.0
+synopsis:            Iterated prisoner's dilemma tournament in which bots can perfectly simulate each other.
+homepage:            https://github.com/pdtournament/pdtournament
+license:             BSD3
+license-file:        LICENSE
+author:              pdtournament
+maintainer:          pdtournament@gmail.com
+category:            Game
+build-type:          Simple
+extra-source-files:  README.md
+cabal-version:       >=1.10
+
+library
+  build-depends:       base >=4.6 && <4.7
+  default-language:    Haskell2010
