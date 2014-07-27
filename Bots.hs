@@ -39,8 +39,8 @@ mirrorBot = Bot (\op hist -> runBot op mirrorBot $ invert hist)
 -- 1/10th of a second to move or defected, then defect.
 justiceBot :: Bot
 justiceBot = Bot (\op hist -> do
-    simulations <- replicateM 20 . time 100000 $ runBot op cooperateBot []
-    return (if Just Defect `elem` simulations || Nothing `elem` simulations
+    sims <- replicateM 20 . time 100000 $ runBot op cooperateBot $ invert hist
+    return (if Just Defect `elem` sims || Nothing `elem` sims
                 then Defect
                 else Cooperate))
 

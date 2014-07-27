@@ -51,7 +51,7 @@ payoff moves = case moves of
     (Cooperate, Defect)    -> (0, 5)
     (Cooperate, Cooperate) -> (3, 3)
 
--- Swap the positions of each move in a list of previous moves.
+-- Swap the positions of each players' moves in a list of previous moves.
 -- E.g., [(your #1 move, their #1 move) ... (your #10 move, their #10 move)]
 --    -> [(their #1 move, your #1 move) ... (their #10 move, your #10 move)]
 invert :: [Moves] -> [Moves]
@@ -63,7 +63,7 @@ totalScores = (\(x,y)-> (sum x, sum y)) . unzip . map payoff
 -------------- Bots, rounds, and matches --------------
 
 -- A bot is a function that takes another bot and the history of the previous
--- rounds as input, and returns a Choice inside the BotEvironment monad, which
+-- rounds as input, and returns a Choice inside the BotEnvironment monad, which
 -- is a subset of the IO monad that allows bots to generate random numbers and
 -- simulate other bots with or without a timeout function. However, to prevent
 -- bots from "breaking out of the box," any other forms of IO will not work
@@ -74,7 +74,7 @@ class (Functor m, Applicative m, Monad m) => BotEnvironment m where
     rand :: m Double
     time :: Int -> m a -> m (Maybe a)
 
--- The BotEvironment monad provides two useful functions: "rand" which
+-- The BotEnvironment monad provides two useful functions: "rand" which
 -- generates a random float, and "time", which fully evaluates and runs and
 -- action with a timeout
 instance BotEnvironment IO where
