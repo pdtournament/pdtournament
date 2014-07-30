@@ -10,6 +10,7 @@ module Tournament (
     runTournament, tabulateResults, showMatchPlayByPlay,
     ) where
 
+import Prelude
 import Control.Applicative (Applicative)
 import Control.Exception (SomeException, handle)
 import Control.Monad (replicateM, liftM2, liftM3)
@@ -82,11 +83,11 @@ instance BotEnvironment IO where
     time i = handleAll (\_ -> return Nothing) . timeout i . evalM
 
 -- A round pits two bots against each other, giving each access to the history
--- of all previous rounds and each other's source code. Each bot has 2 seconds
+-- of all previous rounds and each other's source code. Each bot has 5 seconds
 -- to make a move or else Defect will be automatically chosen.
 runRound :: BotEnvironment m => Bot -> Bot -> [Moves] -> m Moves
 runRound bot1 bot2 history = sequenceM2' (runBot1, runBot2)
-  where runTimeout = fmap (fromMaybe Defect) . time (2 * 10 ^ 6)
+  where runTimeout = fmap (fromMaybe Defect) . time (5 * 10 ^ 6)
         runBot1 = runTimeout $ runBot bot1 bot2 history
         runBot2 = runTimeout $ runBot bot2 bot1 $ invert history
 

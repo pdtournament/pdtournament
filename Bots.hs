@@ -1,5 +1,6 @@
 module Bots where
 
+import Prelude
 import Control.Monad (replicateM)
 
 import Tournament
@@ -34,12 +35,23 @@ titForTatBot = Bot (\_ history -> case history of
 mirrorBot :: Bot
 mirrorBot = Bot (\op hist -> runBot op mirrorBot $ invert hist)
 
--- Simulate my opponent playing the current round against cooperateBot 20
+-- Same as above, but only wait 1/100th of a second before terminating the
+-- simulation, and cooperate if the simulation did not finish or raised an
+-- exception.
+
+smarterMirrorBot :: Bot
+smarterMirrorBot = Bot (\op hist -> do
+    simulation <- time 10000 . runBot op mirrorBot $ invert hist
+    return (case simulation of
+                Nothing   -> Cooperate
+                Just move -> move))
+
+-- Simulate my opponent playing the current round against cooperateBot 50
 -- times, and cooperate if my opponent always cooperated; if it took more than
--- 1/10th of a second to move or defected, then defect.
+-- 1/100th of a second to move or defected, then defect.
 justiceBot :: Bot
 justiceBot = Bot (\op hist -> do
-    sims <- replicateM 20 . time 100000 $ runBot op cooperateBot $ invert hist
+    sims <- replicateM 50 . time 10000 . runBot op cooperateBot $ invert hist
     return (if Just Defect `elem` sims || Nothing `elem` sims
                 then Defect
                 else Cooperate))
@@ -51,16 +63,17 @@ examplePlayers = [ Player "CooperateBot" cooperateBot
                  , Player "DefectBot" defectBot
                  , Player "RandomBot" randomBot
                  , Player "TitForTatBot" titForTatBot
-                 , Player "MirrorBot" mirrorBot
+                 , Player "SmarterMirrorBot" smarterMirrorBot
                  , Player "JusticeBot" justiceBot ]
 
--- Run a sample tournament with 10 rounds per match.
-runExample :: [Player] -> IO ()
-runExample contestants = do
+-- A sample tournament with 10 rounds per match.
+exampleTournament :: [Player] -> IO ()
+exampleTournament contestants = do
     results <- runTournament 10 contestants
     mapM_ (\x -> putStrLn (showMatchPlayByPlay x) >> putStrLn "") results
     putStrLn "Final scores:"
     mapM_ print $ tabulateResults results
 
-main :: IO ()
-main = runExample examplePlayers
+-- Run the sample tournament.
+runExample :: IO ()
+runExample = exampleTournament examplePlayers
