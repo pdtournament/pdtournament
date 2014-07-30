@@ -12,6 +12,10 @@ opponent before making a move. This completely changes the nature of the game
 and enables [all sorts of new and interesting
 strategies](http://lesswrong.com/lw/hmx/prisoners_dilemma_with_visible_source_code/).
 
+See the tutorial below and the `Tournament.hs` and `Bots.hs` files for more
+instructions on how to create and submit a bot. After the tournament is over, I will
+announce the winner and make all of the code and data publically available.
+
 ## Submitting a bot ##
 
 Email all submissions and/or questions to
@@ -26,6 +30,10 @@ Submission rules:
 * On each turn, the bot must output either `Cooperate` or `Defect` within 5
   seconds, otherwise `Defect` will be automatically chosen. Throwing an
   Exception (for any reason) will also be treated as a `Defect`.
+* Each bot will play one match against all other bots and against itself, where
+  a match consists of 100 rounds of the prisoner's dilemma. The winner of the
+  tournament is the bot with the highest combined score from all matches (the
+  payoff matrix is shown below).
 * You can import and use anything from the Haskell 2010 standard libraries
   (i.e.  [base](http://hackage.haskell.org/package/base)) with the exception of
   the unsafe modules and the FFI. You are also encouraged to use the functions
@@ -40,15 +48,6 @@ Submission rules:
 * User-submitted code will be made public after the tournament unless you
   request that your code remain private. Names and emails always will be kept
   private, so give your bot an interesting name!
-
-Each bot will play one match against all other bots and against itself, where a
-match consists of 100 rounds of the prisoner's dilemma. The winner of the
-tournament is the bot with the highest combined score from all matches (the
-payoff matrix is shown below).
-
-See the tutorial below and the `Tournament.hs` and `Bots.hs` files for more
-instructions on how to create a bot. After the tournament is over, I will
-announce the winner and make all of the code and data publically available.
 
 You **are not** allowed to use:
 * Third-party Haskell libraries, with the exception of this repo
