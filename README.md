@@ -247,6 +247,12 @@ not necessarily a wise strategy, as it will always cooperate with a bot that
 raises an Exception, but it at least ensures that `smarterMirrorBot` will
 cooperate with bots like `mirrorBot`.
 
+Again, note that we apply the `invert` function, so that the opponent sees the
+history of moves in the correct order. It is also possible to modify the
+history before passing it to the opponent, simply by adding, modifying, or
+truncating the list of `[(Choice, Choice)]` pairs; this lets us observe what
+the opposing bot would do under certain conditions.
+
 We can build more complex bots that run multiple simulations using `replicateM`
 and `time`:
 
