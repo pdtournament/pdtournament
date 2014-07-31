@@ -1,7 +1,5 @@
 ## Program Equilibrium Iterated Prisoner's Dilemma Tournament ##
 
-**NOTE: The tournament is not yet open; please check back in a few days!**
-
 Welcome to the 2014 program equilibrium iterated prisoner's dilemma tournament!
 
 Anyone can submit a Haskell bot to the tournament and compete against other
@@ -20,7 +18,7 @@ announce the winner and make all of the code and data publically available.
 
 Email all submissions and/or questions to
 [pdtournament@gmail.com](mailto:pdtournament@gmail.com). Submissions must be
-sent in by **[date TBD]**.
+sent in by **August 1, 2014 13:59 UTC**.
 
 Submission rules:
 * One submission per person.
