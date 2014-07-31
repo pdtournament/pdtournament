@@ -1,6 +1,6 @@
 ## Program Equilibrium Iterated Prisoner's Dilemma Tournament ##
 
-Welcome to the 2014 program equilibrium iterated prisoner's dilemma tournament!
+Welcome to the 2014 program equilibrium iterated PD tournament!
 
 Anyone can submit a Haskell bot to the tournament and compete against other
 user-submitted bots. Unlike the standard iterated PD, bots are not only allowed
@@ -18,7 +18,7 @@ announce the winner and make all of the code and data publically available.
 
 Email all submissions and/or questions to
 [pdtournament@gmail.com](mailto:pdtournament@gmail.com). Submissions must be
-sent in by **August 1, 2014 13:59 UTC**.
+sent in by **September 1, 2014 13:59 UTC**.
 
 Submission rules:
 * One submission per person.
@@ -107,8 +107,8 @@ The outcome of a round is a pair of decisions, one for each player:
 type Moves = (Choice, Choice)
 ```
 
-The outcome of multiple rounds is simply a list of these outcomes, i.e. a value
-of type `[Moves]`.
+The outcome of multiple rounds is simply a list of these outcome pairs, i.e. a
+value of type `[Moves]`.
 
 Defining a bot in the program equilibrium PD is slightly more complicated. In
 general, a value of type `Bot` is a function of type `Bot -> [Moves] ->
