@@ -7,7 +7,8 @@ module Tournament (
     BotEnvironment, rand, time,
     payoff, totalScores, invert,
     runBot, runRound, runMatch, rounds,
-    runTournament, tabulateResults, showMatchPlayByPlay,
+    runRoundRobin, tabulateResults, eliminateHalf,
+    showMatchPlayByPlay, displayTournament
     ) where
 
 import Prelude
@@ -104,6 +105,14 @@ rounds n b1 b2 history
 
 -------------- Tournament structure --------------
 
+-- A tournament is a series of round-robin elimination rounds. At the end of
+-- each round-robin round, the bots with scores lower than the median score are
+-- removed from the tournament pool. This process is repeated until only one
+-- bot remains, or until there is a tie between all the remaining bots.
+
+-- You can use these functions to run demo tournaments to battle-test your bot.
+-- Check out the Bots.hs file for an example tournament.
+
 data Player = Player { name :: String, bot :: Bot }
 
 instance Show Player where
@@ -117,19 +126,51 @@ instance Ord Player where
 
 type MatchResult = (Player, Player, [Moves])
 
--- A tournament consists of all combinations of bots playing one match against
--- each other (including each bot playing one match against itself).
-runTournament :: BotEnvironment m => Int -> [Player] -> m [MatchResult]
-runTournament n = mapM (sequenceM3' . result) . matches
-  where result (b1:b2:_) = (return b1, return b2, runMatch n (bot b1) (bot b2))
-        matches = nub . map sort . replicateM 2
+showMatchPlayByPlay :: MatchResult -> String
+showMatchPlayByPlay (b1, b2, hist) = name b1 ++ " vs " ++ name b2 ++ moves
+  where moves = foldr ((++) . (++) "\n" . show) "" hist
 
--- A bot's final score is simply their combined score from all matches played.
+-- A round-robin round consists of all combinations of bots playing one match
+-- against each other.
+runRoundRobin :: BotEnvironment m => Int -> [Player] -> m [MatchResult]
+runRoundRobin n = mapM (sequenceM3' . result) . matches
+  where result (b1:b2:_) = (return b1, return b2, runMatch n (bot b1) (bot b2))
+        matches = filter (\x -> nub x == x) . nub . map sort . replicateM 2
+
+-- A bot's combined score in a round-robin round is simply the sum of its score
+-- from all matches it played.
 tabulateResults :: [MatchResult] -> [(Player, Int)]
 tabulateResults = sort . toList . fromListWith (+) . concatMap getPayoffs
   where getPayoffs (b1, b2, h) = [(b1, fst $ totalScores h),
                                   (b2, snd $ totalScores h)]
 
-showMatchPlayByPlay :: MatchResult -> String
-showMatchPlayByPlay (b1, b2, hist) = name b1 ++ " vs " ++ name b2 ++ moves
-  where moves = foldr ((++) . (++) "\n" . show) "" hist
+-- After a round-robin round, eliminate the lower-scoring half of the
+-- tournament pool.
+eliminateHalf :: [(Player, Int)] -> [Player]
+eliminateHalf [] = []
+eliminateHalf pairs = map fst $ filter ((> median) . snd) pairs
+  where median = med . sort $ map snd pairs
+        med lst
+            | odd $ length lst  = lst !! mid
+            | even $ length lst = ((lst !! mid) + (lst !! (mid - 1))) `div` 2
+        mid = length pairs `div` 2
+
+-- Run a tournament and print it to stdout.
+displayTournament :: Int -> [Player] -> IO ()
+displayTournament n [] = putStrLn "No bots."
+displayTournament n [winner] = putStr "Winner: " >> print winner
+displayTournament n players = do
+    putStrLn "\n<Start round-robin round>\n"
+    robin <- runRoundRobin n players
+    mapM_ (\x -> putStrLn (showMatchPlayByPlay x) >> putStrLn "") robin
+
+    let scores = tabulateResults robin
+    putStrLn "Scores after this round-robin round:"
+    mapM_ print scores >> putStrLn ""
+
+    if (length . nub $ map snd scores) == 1
+        then putStrLn "Tie between these bots:" >> print players
+        else let remainingBots = eliminateHalf scores in do
+            putStrLn "Bots continuing to the next round:"
+            print remainingBots >> putStrLn ""
+            displayTournament n remainingBots

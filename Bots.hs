@@ -66,14 +66,6 @@ examplePlayers = [ Player "CooperateBot" cooperateBot
                  , Player "SmarterMirrorBot" smarterMirrorBot
                  , Player "JusticeBot" justiceBot ]
 
--- A sample tournament with 10 rounds per match.
-exampleTournament :: [Player] -> IO ()
-exampleTournament contestants = do
-    results <- runTournament 10 contestants
-    mapM_ (\x -> putStrLn (showMatchPlayByPlay x) >> putStrLn "") results
-    putStrLn "Final scores:"
-    mapM_ print $ tabulateResults results
-
--- Run the sample tournament.
+-- Run the example tournament.
 runExample :: IO ()
-runExample = exampleTournament examplePlayers
+runExample = displayTournament 10 examplePlayers

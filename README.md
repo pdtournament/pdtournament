@@ -6,7 +6,7 @@ Welcome to the 2014 program equilibrium iterated prisoner's dilemma tournament!
 
 Anyone can submit a Haskell bot to the tournament and compete against other
 user-submitted bots. Unlike the standard iterated PD, bots are not only allowed
-to remember the outcomes of previous rounds but also have ability to run the
+to remember the outcomes of previous rounds but also have the ability to run the
 bot they are playing against, so that each bot can perfectly simulate its
 opponent before making a move. This completely changes the nature of the game
 and enables [all sorts of new and interesting
@@ -25,22 +25,22 @@ sent in by **[date TBD]**.
 Submission rules:
 * One submission per person.
 * Your submission must be a Haskell (.hs) file that imports `Tournament.hs` and
-  `Bot.hs`, and contains a function of type `Bot` as defined in
+  `Bot.hs` and contains a function of type `Bot`, as defined in
   `Tournament.hs`. See the tutorial section below for more details.
 * On each turn, the bot must output either `Cooperate` or `Defect` within 5
   seconds, otherwise `Defect` will be automatically chosen. Throwing an
   Exception (for any reason) will also be treated as a `Defect`.
-* Each bot will play one match against all other bots and against itself, where
-  a match consists of 100 rounds of the prisoner's dilemma. The winner of the
-  tournament is the bot with the highest combined score from all matches (the
-  payoff matrix is shown below).
+* The tournament will be round-robin elimination: Each bot will play one match
+  against all other bots, where a match consists of 100 rounds of the
+  prisoner's dilemma. At the end of the round-robin round, the lower-scoring
+  half of the tournament pool will be eliminated. This process will be repeated
+  until only one bot remains, or there is a tie. The whole tournament will be
+  run 1000 times, and the bot that places first most frequently will be
+  declated the overall winner. The payoff matrix is shown below.
 * You can import and use anything from the Haskell 2010 standard libraries
-  (i.e.  [base](http://hackage.haskell.org/package/base)) with the exception of
+  (i.e. [base](http://hackage.haskell.org/package/base)) with the exception of
   the unsafe modules and the FFI. You are also encouraged to use the functions
   and example bots in `Tournaments.hs` and `Bots.hs` as building blocks.
-* If multiple people submit identical bots, only one copy of the bot will be
-  entered into the tournament, and all of the submitters will be credited as
-  its creator.
 * Your submission file may include separate helper functions or any other style
   of code organization you desire (including helper functions representing
   other kinds of bots), as long as I can find the bot you want to enter in the
@@ -126,9 +126,9 @@ this environment, bots can perform certain I/O actions such as generating
 random numbers and safely simulating opponents, but all other side effects are
 prohibited. This environment is represented by the typeclass `(Monad m) =>
 BotEnvironment m`, which defines the actions that can be performed in the
-environment, as well as by its instance `BotEnvironment IO`, contains the
+environment, as well as by its instance `BotEnvironment IO`, which contains the
 actual implementations of the functions that bots can use to perform these
-actions. (See the `Tournaments.hs` file if you are interested in these
+actions. (See the `Tournament.hs` file if you are interested in the
 implementation details).
 
 With this in mind, we can define a `Bot` using the following type:
@@ -143,7 +143,7 @@ simply call the `runBot` function and pass in the bot, the opponent, and the
 history of previous rounds. Note that the only way to run a bot is via the
 `runBot` function, meaning that a bot cannot distinguish between when it is
 being simulated by another bot and when it is being run by the tournament code.
-Again, for more details, see the `Tournament.hs` file.
+For more details, see the `Tournament.hs` file.
 
 ### Writing a bot ###
 
@@ -193,10 +193,10 @@ our simulated opponent. `invert` is a helper function that simply swaps the
 positions of each player's moves in a list of `(Choice, Choice)` pairs.
 
 However, there is one major problem with this strategy: When `mirrorBot` plays
-against itself, it will defect, since the call to `runBot mirrorBot mirrorBot $
-invert hist` will create an infinite chain of recursive function calls that
-won't terminate until it is stopped by the five-second time limit. This mutual
-defection would cost `mirrorBot` a significant number of points in a
+against a bot that also directly simulates its opponent, it will defect, since
+the call to `runBot` will create an infinite chain of recursive function calls
+that won't terminate until it is stopped by the five-second time limit. This
+mutual defection could cost `mirrorBot` a significant number of points in a
 tournament. `mirrorBot` would fare much better if it could simulate other bots
 in a more controlled environment, so that we can run our simulations and then
 make a decision based on the result. We might also want to add some randomness
@@ -247,7 +247,7 @@ waits 1/100th of a second before terminating the simulation, and outputs
 `Cooperate` in the event that the simulation times out or errors out. This is
 not necessarily a wise strategy, as it will always cooperate with a bot that
 raises an Exception, but it at least ensures that `smarterMirrorBot` will
-cooperate with itself.
+cooperate with bots like `mirrorBot`.
 
 We can build more complex bots that run multiple simulations using `replicateM`
 and `time`:
