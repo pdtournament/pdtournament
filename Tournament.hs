@@ -148,11 +148,11 @@ tabulateResults = sort . toList . fromListWith (+) . concatMap getPayoffs
 -- tournament pool.
 eliminateHalf :: [(Player, Int)] -> [Player]
 eliminateHalf [] = []
-eliminateHalf pairs = map fst $ filter ((> median) . snd) pairs
+eliminateHalf pairs = map fst $ filter ((>= median) . snd) pairs
   where median = med . sort $ map snd pairs
         med lst
             | odd $ length lst  = lst !! mid
-            | even $ length lst = ((lst !! mid) + (lst !! (mid - 1))) `div` 2
+            | even $ length lst = 1 + ((lst !! mid) + (lst !! (mid - 1))) `div` 2
         mid = length pairs `div` 2
 
 -- Run a tournament and print it to stdout.
