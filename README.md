@@ -18,7 +18,7 @@ announce the winner and make all of the code and data publically available.
 
 Email all submissions and/or questions to
 [pdtournament@gmail.com](mailto:pdtournament@gmail.com). Submissions must be
-sent in by **September 1, 2014 13:59 UTC**.
+sent in by **September 15, 2014 13:59 UTC**.
 
 Submission rules:
 * One submission per person.

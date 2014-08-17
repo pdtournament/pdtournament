@@ -1,7 +1,7 @@
 {-# LANGUAGE RankNTypes #-}
 
 module Tournament (
-    handleAll, evalM,
+    evalM, handleAll,
     Bot(Bot), Choice(Cooperate, Defect), Moves,
     Player(Player), MatchResult,
     BotEnvironment, rand, time,
@@ -13,6 +13,7 @@ module Tournament (
 
 import Prelude
 import Control.Applicative (Applicative)
+import Control.Concurrent (threadDelay)
 import Control.Exception (SomeException, handle)
 import Control.Monad (replicateM, liftM2, liftM3)
 import Data.List (nub, sort)
@@ -22,8 +23,8 @@ import Data.Tuple (swap)
 import System.Random (randomRIO)
 import System.Timeout (timeout)
 
-handleAll :: (SomeException -> IO (Maybe a)) -> IO (Maybe a) -> IO (Maybe a)
-handleAll = handle
+_handle :: (SomeException -> IO (Maybe a)) -> IO (Maybe a) -> IO (Maybe a)
+_handle = handle
 
 evalM :: Monad m => m a -> m a
 evalM = (>>= (return $!))
@@ -70,25 +71,35 @@ totalScores = (\(x,y)-> (sum x, sum y)) . unzip . map payoff
 -- simulate other bots with or without a timeout function. However, to prevent
 -- bots from "breaking out of the box," any other forms of IO will not work
 -- inside this monad.
-newtype Bot = Bot { runBot :: BotEnvironment m => Bot -> [Moves] -> m Choice }
+newtype Bot = Bot { _runBot :: BotEnvironment m => Bot -> [Moves] -> m Choice }
+
+runBot :: BotEnvironment m => Bot -> Bot -> [Moves] -> m Choice
+runBot bot opp hist = do
+    _pause 10
+    _runBot bot opp hist
 
 class (Functor m, Applicative m, Monad m) => BotEnvironment m where
     rand :: m Double
     time :: Int -> m a -> m (Maybe a)
+    handleAll :: (SomeException -> m (Maybe a)) -> m (Maybe a) -> m (Maybe a)
+    _pause :: Int -> m ()
 
 -- The BotEnvironment monad provides two useful functions: "rand" which
 -- generates a random float, and "time", which fully evaluates and runs and
 -- action with a timeout
 instance BotEnvironment IO where
     rand = randomRIO (0.0, 1.0)
-    time i = handleAll (\_ -> return Nothing) . timeout i . evalM
+    time i = timeout i . evalM
+    handleAll = _handle
+    _pause = threadDelay
 
 -- A round pits two bots against each other, giving each access to the history
 -- of all previous rounds and each other's source code. Each bot has 5 seconds
 -- to make a move or else Defect will be automatically chosen.
 runRound :: BotEnvironment m => Bot -> Bot -> [Moves] -> m Moves
 runRound bot1 bot2 history = sequenceM2' (runBot1, runBot2)
-  where runTimeout = fmap (fromMaybe Defect) . time (5 * 10 ^ 6)
+  where runTimeout = fmap (fromMaybe Defect)
+            . handleAll (\_ -> return Nothing) . time (5 * 10 ^ 6)
         runBot1 = runTimeout $ runBot bot1 bot2 history
         runBot2 = runTimeout $ runBot bot2 bot1 $ invert history
 
