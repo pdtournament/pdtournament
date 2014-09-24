@@ -1,5 +1,9 @@
 ## Program Equilibrium Iterated Prisoner's Dilemma Tournament ##
 
+**The tournament is now closed; see [this
+post](http://lesswrong.com/r/discussion/lw/l16/2014_iterated_prisoners_dilemma_tournament_results/)
+for the results!**
+
 Welcome to the 2014 program equilibrium iterated PD tournament!
 
 Anyone can submit a Haskell bot to the tournament and compete against other
